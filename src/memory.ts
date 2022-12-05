@@ -1,4 +1,5 @@
-const fs = require('fs');
+import 'fs';
+import { ENTRY_POINT_ADDRESS, MEMORY_SIZE, DISPLAY_SIZE } from './constants';
 
 const font = new Uint8Array([
   0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -19,25 +20,25 @@ const font = new Uint8Array([
   0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 ]);
 
-module.exports = (function registers() {
-  const memory = Array.from({ length: 4096 }).fill(0);
+export default (function registers() {
+  const memory = Array.from({ length: MEMORY_SIZE }).fill(0) as number[];
+  const display = Array.from({ length: DISPLAY_SIZE }).fill(0) as number[];
   function init() {
     loadFont();
   }
-  function loadRom(path) {
-    const game = fs.readFileSync(path);
-    const opcodes = game.toString('hex');
-    memory.splice(0x200, game.length, ...game);
+  function loadRom(game: number[]) {
+    memory.splice(ENTRY_POINT_ADDRESS, game.length, ...game);
   }
   function loadFont() {
-    memory.splice(memory, font.length, ...font);
+    memory.splice(0, font.length, ...font);
   }
   return function () {
     init();
     return {
       memory,
       init,
-      loadRom
+      loadRom,
+      display
     };
   };
 }());
